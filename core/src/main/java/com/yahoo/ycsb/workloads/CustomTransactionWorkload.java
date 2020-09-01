@@ -84,18 +84,21 @@ public class CustomTransactionWorkload extends CoreWorkload {
 
   public void doTransactionCustom(DB db) {
 
+
     String[] transationKeys = new String[documentsintransaction];
     HashMap<String, ByteIterator>[] transationValues = new HashMap[documentsintransaction];
     String[] transationOperations = new String[documentsintransaction];
     HashSet<String> fields = null;
     HashMap<String, ByteIterator> result = new HashMap<String, ByteIterator>();
 
-    String transactionOperation = transactionoperationchooser.nextString();
+    //String transactionOperation = transactionoperationchooser.nextString();
+
+    //System.out.println("transactionOperation here :::"  + transactionOperation);
 
     for(int i=0; i<documentsintransaction; i++){
-      transationOperations[i] = transactionOperation;
+      transationOperations[i] = transactionoperationchooser.nextString();
 
-      switch (transactionOperation) {
+      switch (transationOperations[i]) {
       case "TRREAD":
         transationKeys[i] = buildKeyName(nextKeynum());
         transationValues[i] = null;
