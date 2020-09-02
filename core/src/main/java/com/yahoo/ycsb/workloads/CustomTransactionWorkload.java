@@ -34,6 +34,7 @@ public class CustomTransactionWorkload extends CoreWorkload {
   private List<String> fieldnames;
   private Measurements measurements = Measurements.getMeasurements();
   protected DiscreteGenerator operationchooser;
+  protected String[] transactionoperationArray;
 
 
   private HashMap<String, ByteIterator> buildRandomValues() {
@@ -68,6 +69,8 @@ public class CustomTransactionWorkload extends CoreWorkload {
         TRANSACTION_INSERTSPROPORTION_PROPERTY_DEFAULT));
     transactionoperationchooser = createTransactionOperationGenerator(transactionreadsproportion,
         transactionwritesproportion, transactioninsertsproportion);
+    transactionoperationArray = createTransactionOperationArray(transactionreadsproportion,
+        transactionwritesproportion, transactioninsertsproportion, documentsintransaction);
     operationchooser = createOperationGenerator(p);
 
 
@@ -91,14 +94,11 @@ public class CustomTransactionWorkload extends CoreWorkload {
     HashSet<String> fields = null;
     HashMap<String, ByteIterator> result = new HashMap<String, ByteIterator>();
 
-    //String transactionOperation = transactionoperationchooser.nextString();
-
-    //System.out.println("transactionOperation here :::"  + transactionOperation);
 
     for(int i=0; i<documentsintransaction; i++){
       transationOperations[i] = transactionoperationchooser.nextString();
 
-      switch (transationOperations[i]) {
+      switch (transactionoperationArray[i]) {
       case "TRREAD":
         transationKeys[i] = buildKeyName(nextKeynum());
         transationValues[i] = null;
@@ -187,6 +187,49 @@ public class CustomTransactionWorkload extends CoreWorkload {
     }
 
     return operationchooser;
+  }
+
+
+  public static int convertPercentagetoNumbers(double value, int numofdocs) {
+
+    //convert decimal percentage to percentage of number of docs in transaction
+
+    int valuepercentage = (int)(value * numofdocs);
+
+    return valuepercentage;
+  }
+
+
+  protected static String[] createTransactionOperationArray(final double transactionreadsproportion,
+                                                            final double transactionwritesproportion,
+                                                            final double transactioninsertsproportion,
+                                                            final int documentsintransaction) {
+
+    String[] operationchooserarray = new String [documentsintransaction];
+
+    int numreadoperations = convertPercentagetoNumbers(transactionreadsproportion, documentsintransaction);
+
+    int numupdateoperations = convertPercentagetoNumbers(transactionwritesproportion, documentsintransaction);
+
+    int numinsertoperations = convertPercentagetoNumbers(transactioninsertsproportion, documentsintransaction);
+
+
+    for(int i=0; i<documentsintransaction; i++) {
+
+      if (transactionreadsproportion > 0 && i < numreadoperations) {
+        operationchooserarray[i] = "TRREAD";
+      }
+
+      if (transactionwritesproportion > 0 && i >= numreadoperations && i < (numupdateoperations + numreadoperations)) {
+        operationchooserarray[i] = "TRUPDATE";
+      }
+
+      if (transactioninsertsproportion > 0 && i >= (numupdateoperations + numreadoperations)
+          && i < numinsertoperations + numreadoperations + numupdateoperations) {
+        operationchooserarray[i] = "TRINSERT";
+      }
+    }
+    return operationchooserarray;
   }
 
 
