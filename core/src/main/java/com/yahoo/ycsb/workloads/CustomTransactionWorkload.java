@@ -130,7 +130,7 @@ public class CustomTransactionWorkload extends CoreWorkload {
       }
     }
 
-    db.transaction(table, transationKeys, transationValues, transationOperations, fields, result);
+    db.transaction(table, transationKeys, transationValues, transactionoperationArray, fields, result);
   }
 
 
