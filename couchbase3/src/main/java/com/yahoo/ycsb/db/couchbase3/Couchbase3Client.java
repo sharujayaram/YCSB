@@ -80,9 +80,9 @@ public class Couchbase3Client extends DB {
   private static volatile Bucket bucket;
   private static volatile ClusterOptions clusterOptions;
   //private volatile Collection collectiont;
-  private static Transactions transactions;
-  private static boolean transactionEnabled;
-  private int[] transactionKeys;
+  //private Transactions transactions;
+  private boolean transactionEnabled;
+  private int numATRS;
 
   private volatile TransactionDurabilityLevel transDurabilityLevel;
 
@@ -106,6 +106,7 @@ public class Couchbase3Client extends DB {
   private static long kvTimeoutMillis;
   private static int kvEndpoints;
   private boolean upsert;
+
 
 
   @Override
@@ -139,7 +140,7 @@ public class Couchbase3Client extends DB {
     upsert = props.getProperty("couchbase.upsert", "false").equals("true");
 
 
-    int numATRS = Integer.parseInt(props.getProperty("couchbase.atrs", "20480"));
+    numATRS = Integer.parseInt(props.getProperty("couchbase.atrs", "20480"));
 
     hostname = props.getProperty("couchbase.host", "127.0.0.1");
     kvPort = Integer.parseInt(props.getProperty("couchbase.kvPort", "11210"));
@@ -190,12 +191,12 @@ public class Couchbase3Client extends DB {
         reactiveCluster = cluster.reactive();
         bucket = cluster.bucket(bucketName);
 
-        if ((transactions == null) && transactionEnabled) {
-          transactions = Transactions.create(cluster, TransactionConfigBuilder.create()
-              .durabilityLevel(transDurabilityLevel)
-              .numATRs(numATRS)
-              .build());
-        }
+        //if ((transactions == null) && transactionEnabled) {
+          //transactions = Transactions.create(cluster, TransactionConfigBuilder.create()
+              //.durabilityLevel(transDurabilityLevel)
+              //.numATRs(numATRS)
+              //.build());
+        //}
       }
     }
     OPEN_CLIENTS.incrementAndGet();
@@ -484,6 +485,13 @@ public class Couchbase3Client extends DB {
                                    Map<String, ByteIterator> result) {
 
     Collection collection = bucket.defaultCollection();
+
+    //System.out.println("entered transactions here and gonna build one");
+
+    Transactions transactions = Transactions.create(cluster, TransactionConfigBuilder.create()
+        .durabilityLevel(transDurabilityLevel)
+        .numATRs(numATRS)
+        .build());
 
     try {
 
