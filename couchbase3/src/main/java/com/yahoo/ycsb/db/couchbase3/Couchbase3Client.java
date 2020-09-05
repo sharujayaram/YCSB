@@ -80,8 +80,8 @@ public class Couchbase3Client extends DB {
   private static volatile Bucket bucket;
   private static volatile ClusterOptions clusterOptions;
   //private volatile Collection collectiont;
-  //private Transactions transactions;
-  private boolean transactionEnabled;
+  private static Transactions transactions;
+  private static boolean transactionEnabled;
   private int numATRS;
 
   private volatile TransactionDurabilityLevel transDurabilityLevel;
@@ -191,12 +191,12 @@ public class Couchbase3Client extends DB {
         reactiveCluster = cluster.reactive();
         bucket = cluster.bucket(bucketName);
 
-        //if ((transactions == null) && transactionEnabled) {
-          //transactions = Transactions.create(cluster, TransactionConfigBuilder.create()
-              //.durabilityLevel(transDurabilityLevel)
-              //.numATRs(numATRS)
-              //.build());
-        //}
+        if ((transactions == null) && transactionEnabled) {
+          transactions = Transactions.create(cluster, TransactionConfigBuilder.create()
+              .durabilityLevel(transDurabilityLevel)
+              .numATRs(numATRS)
+              .build());
+        }
       }
     }
     OPEN_CLIENTS.incrementAndGet();
@@ -487,11 +487,6 @@ public class Couchbase3Client extends DB {
     Collection collection = bucket.defaultCollection();
 
     //System.out.println("entered transactions here and gonna build one");
-
-    Transactions transactions = Transactions.create(cluster, TransactionConfigBuilder.create()
-        .durabilityLevel(transDurabilityLevel)
-        .numATRs(numATRS)
-        .build());
 
     try {
 

@@ -96,7 +96,7 @@ public class CustomTransactionWorkload extends CoreWorkload {
 
 
     for(int i=0; i<documentsintransaction; i++){
-      transationOperations[i] = transactionoperationchooser.nextString();
+      //transationOperations[i] = transactionoperationchooser.nextString();
 
       switch (transactionoperationArray[i]) {
       case "TRREAD":
